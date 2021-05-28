@@ -104,7 +104,7 @@ namespace DataBaseMySQL
 				connection.Open(); //открытие подключения
 
 				string sql = "INSERT INTO table1 (date, done, task) " +
-					"VALUES (@date, @done, @task);";	//команда для добавления данных в базу данных
+							 "VALUES (@date, @done, @task);";	//команда для добавления данных в базу данных
 
 				try
 				{
@@ -151,9 +151,77 @@ namespace DataBaseMySQL
 			  _txtDate.Text, _cmbDone.Text, _txtTask.Text);
 		}
 
-		private void button2_Click(object sender, EventArgs e)
+		private void _btnUpdate_Click(object sender, EventArgs e)
 		{
+			if ((!requiredValidator(new string[]
+		    {
+				_txtId.Text,
+				_txtDate.Text,
+				_cmbDone.Text,
+				_txtTask.Text
+	     	})) || (!checkDate(_txtDate.Text)))
+	 		{
+				MessageBox.Show("Ошибка!", "Входные данные не корректны!");
+				return;
+			}
 
+            try
+            {
+				int res = Int32.Parse(_txtId.Text);
+				if(res <= 0)
+                {
+					MessageBox.Show("Error! Id uncorrect!");
+					return;
+                }
+			} catch(Exception)
+            {
+				MessageBox.Show("Error! Id uncorrect!");
+				return;
+            }
+
+			try
+			{
+				//экземпляр объекта для подключения к базе данных
+				MySqlConnection connection = new MySqlConnection();
+				connection.ConnectionString = conString.ConnectionString;
+				connection.Open(); //открытие подключения
+
+				string sql = "UPDATE table1 " +
+						   	 "SET date = @date, done = @done, task = @task " +
+							 "WHERE id = @id;";
+
+				string[] split = _txtDate.Text.Split(new char[] { '.' });
+				string date = split[2] + '-' + split[1] + '-' + split[0];
+
+				try
+				{
+					//создание команды mysql
+					MySqlCommand cmd = connection.CreateCommand();
+					cmd.CommandText = sql;  //текст команды
+
+					//добавление параметров в команду:
+					cmd.Parameters.AddWithValue("@id", _txtId.Text);
+					cmd.Parameters.AddWithValue("@date", date);
+					cmd.Parameters.AddWithValue("@done", (_cmbDone.Text.Equals("Выполнено")) ? true : false);
+					cmd.Parameters.AddWithValue("@task", _txtTask.Text);
+
+					//выполнение команды
+					cmd.ExecuteNonQuery();
+				}
+				catch (Exception)
+				{
+					MessageBox.Show("Не удалось обновить данные в базу данных!", "Ошибка!");
+				}
+
+				connection.Close();
+			}
+			catch (Exception)
+			{
+				MessageBox.Show("Не удалось подключиться к базе данных!", "Ошибка!");
+				return;
+			}
+
+			readDataFromDB();
 		}
 
 
@@ -163,6 +231,7 @@ namespace DataBaseMySQL
 		public void readDataFromDB()
 		{
 			_dataGridView.Rows.Clear();
+
 			try
 			{
 				//экземпляр объекта для подключения к базе данных
@@ -170,7 +239,7 @@ namespace DataBaseMySQL
 				connection.ConnectionString = conString.ConnectionString;
 				connection.Open(); //открытие подключения
 
-				string sql = "SELECT * FROM table1;";    //команда для чтения данных из таблицы
+				string sql = "SELECT * FROM table1;"; //команда для чтения данных из таблицы
 
 				try
 				{
@@ -191,9 +260,8 @@ namespace DataBaseMySQL
 						}
 					}
 				}
-				catch (Exception g)
+				catch (Exception)
 				{
-					MessageBox.Show(g.Message);
 					MessageBox.Show("Не удалось добавить данные в базу данных!", "Ошибка!");
 				}
 
@@ -205,5 +273,6 @@ namespace DataBaseMySQL
 				return;
 			}
 		}
-	}
+
+    }
 }
