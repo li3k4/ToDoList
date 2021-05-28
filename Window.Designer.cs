@@ -158,6 +158,7 @@ namespace DataBaseMySQL
             this._btnDelete.TabIndex = 9;
             this._btnDelete.Text = "Удалить";
             this._btnDelete.UseVisualStyleBackColor = true;
+            this._btnDelete.Click += new System.EventHandler(this._btnDelete_Click);
             // 
             // _cmbDone
             // 

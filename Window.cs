@@ -210,7 +210,7 @@ namespace DataBaseMySQL
 				}
 				catch (Exception)
 				{
-					MessageBox.Show("Не удалось обновить данные в базу данных!", "Ошибка!");
+					MessageBox.Show("Не удалось обновить данные из базы данных!", "Ошибка!");
 				}
 
 				connection.Close();
@@ -274,5 +274,71 @@ namespace DataBaseMySQL
 			}
 		}
 
+        private void _btnDelete_Click(object sender, EventArgs e)
+        {
+
+			if ((!requiredValidator(new string[]
+			{
+				_txtId.Text,
+		
+			 })))
+			{
+				MessageBox.Show("Ошибка!", "Входные данные не корректны!");
+				return;
+			}
+
+			try
+			{
+				int res = Int32.Parse(_txtId.Text);
+				if (res <= 0)
+				{
+					MessageBox.Show("Error! Id uncorrect!");
+					return;
+				}
+			}
+			catch (Exception)
+			{
+				MessageBox.Show("Error! Id uncorrect!");
+				return;
+			}
+
+			try
+			{
+				//экземпляр объекта для подключения к базе данных
+				MySqlConnection connection = new MySqlConnection();
+				connection.ConnectionString = conString.ConnectionString;
+				connection.Open(); //открытие подключения
+
+				string sql = "DELETE FROM table1 WHERE id = @id; " +
+							"UPDATE table1 SET id = id - 1 	" +
+							"WHERE id > @id; ";
+
+				try
+				{
+					//создание команды mysql
+					MySqlCommand cmd = connection.CreateCommand();
+					cmd.CommandText = sql;  //текст команды
+
+					//добавление параметров в команду:
+					cmd.Parameters.AddWithValue("@id", _txtId.Text);
+
+					//выполнение команды
+					cmd.ExecuteNonQuery();
+				}
+				catch (Exception)
+				{
+					MessageBox.Show("Не удалось удалить данные из базы данных!", "Ошибка!");
+				}
+
+				connection.Close();
+			}
+			catch (Exception)
+			{
+				MessageBox.Show("Не удалось подключиться к базе данных!", "Ошибка!");
+				return;
+			}
+
+			readDataFromDB();
+		}
     }
 }
